@@ -1,0 +1,62 @@
+import java.util.concurrent.Semaphore;
+public class ReaderWriter {
+    static int readcount;
+    static Semaphore s=new Semaphore(1);
+    static Semaphore wrt=new Semaphore(1);
+    static class Reader implements Runnable{
+        public void run(){
+            try{
+            s.acquire();
+            readcount++;
+            if(readcount==1)
+                wrt.acquire();
+            s.release();
+                System.out.println(Thread.currentThread().getName()+" START READING");
+                Thread.sleep(100);
+                System.out.println(Thread.currentThread().getName()+"COMPLETE READING ");
+                s.acquire();
+            readcount--;
+            if(readcount==0)
+                wrt.acquire();
+            s.release();
+            }
+            catch(Exception e){
+                System.out.println(" EXCEPTION");
+            }
+            
+        }
+    }
+     static class Writer implements Runnable{
+        public void run(){
+        try{
+            wrt.acquire();
+            System.out.println(Thread.currentThread().getName()+" START WRITING");
+                Thread.sleep(100);
+                System.out.println(Thread.currentThread().getName()+"COMPLETE WRITING ");
+            wrt.release();
+        }catch(Exception e){System.out.println(" exception");}
+        }
+    }
+    public static void main(String[] args) {
+        Reader r=new Reader();
+        Writer w=new Writer();
+      Thread t1=new Thread(r);
+      Thread t2=new Thread(r);
+      Thread t3=new Thread(w);
+      Thread t4=new Thread(r);
+      Thread t5=new Thread(r);
+      Thread t6 = new Thread(w);
+      t1.setName("Reader 1");
+      t2.setName("Reader 2");
+      t3.setName("Writer 1");
+      t4.setName("Reader 1");
+      t5.setName("Reader 1");
+      t6.setName("Writer 1");
+      t6.start();
+      t1.start();
+      t2.start();
+      t3.start();
+      t4.start();
+      t5.start();
+      }
+}
